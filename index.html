@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Gradient Challenge</title>
+	<style type="text/css" media="screen">
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	#gradient {
+		position: relative;
+		margin: 0 auto;
+		width: 400px;
+		height: 400px;
+	}
+	#gradient div {
+		position: absolute;
+		border-radius: 50%;
+	}
+
+	</style>
+</head>
+<body>
+	<div id="gradient"></div>
+	<script type="text/javascript" charset="utf-8">
+ 	// YOUR CODE GOES HERE.
+ 	function Gradient(element, stops) {
+ 		this.element = element;
+ 		this.element.style.width = element.clientWidth + "px";
+ 		this.stops = stops;
+ 	}
+
+ 	var getTotalStopRange = function(stops) {
+ 		var sum = 0;
+ 		if (stops.length <= 1) {
+ 			return 1;
+ 		}
+ 		for (var i = 1; i < stops.length; i++) {
+ 			sum += Math.abs(stops[i] - stops[i-1]);
+ 		}
+ 		return sum;
+ 	}
+
+ 	var renderGradientRange = function(bottom, top, container, grdWidth) {
+ 		var color = bottom;
+		var isPositive = (top - bottom) > 0
+		var stopRange = Math.abs(top - bottom);
+		var containerWidth = parseInt(container.style.width);
+
+		for (var i = 0; i < stopRange; i++) {
+			var nextDiv = document.createElement("div");
+
+			var divRadius = containerWidth - grdWidth * i;
+			nextDiv.style.width = divRadius + "px";
+			nextDiv.style.height = divRadius + "px";
+			nextDiv.style.backgroundColor = "rgb("+color+","+color+","+color+")";
+			nextDiv.style.marginLeft = grdWidth/2 + "px";
+			nextDiv.style.marginTop = grdWidth/2 + "px";
+
+			container.appendChild(nextDiv);
+			container = nextDiv;
+			if (isPositive) {
+				color++;
+			} else {
+				color--;
+			}
+		}	
+
+		return container;
+ 	}
+
+ 	Gradient.prototype.draw = function(){
+ 		// calculate radius R
+ 		var r = this.element.clientWidth;
+
+ 		// get the total range that the stops array will go over
+ 		var totalStopRange = getTotalStopRange(this.stops);
+
+ 		// determine the width of each rgb color
+		var grdWidth = (r/totalStopRange);
+
+		if (this.stops.length > 1) {
+			var container = this.element;
+			for (var i = 1; i < this.stops.length; i++) {
+				container = renderGradientRange(this.stops[i-1], this.stops[i], container, grdWidth);
+			}
+		}		
+ 	}
+
+ 	Gradient.prototype.clear = function() {
+ 		this.element.removeChild(this.element.childNodes[0]);
+ 	}
+
+ 	Gradient.prototype.push = function() {
+ 		for (var i = 0; i < arguments.length; i++) {
+ 			this.stops.push(arguments[i]);
+ 		}
+ 	}
+
+ 	Gradient.prototype.pop = function() {
+ 		return this.stops.pop();
+ 	}
+
+ 	Gradient.prototype.shift = function() {
+ 		var firstItem = this.stops[0];
+ 		this.stops.splice(0,1);
+ 		return firstItem;
+ 	}
+
+ 	Gradient.prototype.map = function(callback) {
+ 		for (var i = 0; i < this.stops.length; i++) {
+ 			this.stops[i] = callback(this.stops[i]);
+ 		}
+ 	}
+
+ 	Gradient.prototype.unshift = function() {
+ 		for (var i = 0; i < arguments.length; i++) {
+ 			this.stops.unshift(arguments[i]);
+ 		}
+ 	}
+
+ 	var element = document.getElementById('gradient');
+ 	var gradient = new Gradient(element, [0,255]);
+
+ 	gradient.draw();
+ 	</script>
+</body>
+</html>
